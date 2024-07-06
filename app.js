@@ -10,19 +10,24 @@ const Ma = require('./models/maModel.js')
 const laxmi = require('./models/laxmimaModel.js')
 const ganesh = require('./models/ganeshModel.js')
 const hanuman = require('./models/hanumanjiModel.js')
+const Image = require('./models/wallpaper.js')
+const multer = require('multer');
+const Wallpaper = require('./models/upload_wallpaper.js')
+const GodQuotes = require('./models/godQuotesModel.js')
 
 const app = express()
 const PORT = process.env.PORT;
 
-app.use(express.json()); // for parsing application/json
+app.use(express.json()); 
+
+
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage });
 
 
 
 
 
-// mongoose.connect('mongodb+srv://aannkkiitt321:Ankitdon7+@freeapi.szwrsvj.mongodb.net/')
-// .then(() => {
-//   console.log('Connected to database')
 
   app.get('/songs', (req, res) => {
   Song.find({})
@@ -181,6 +186,74 @@ app.post('/upload', (req, res) => {
   });
    newSong.save()
 });
+
+app.get('/images', async (req, res) => {
+  try {
+    const images = await Image.find({}, 'imageData'); // Fetch only imageData field
+    res.json(images);
+  } catch (error) {
+    console.error('Error fetching images:', error);
+    res.status(500).send(error.message);
+  }
+});
+
+
+app.post('/upload-wallpaper', upload.single('image'), async (req, res) => {
+  try {
+    const { mimetype, buffer } = req.file;
+    const imageData = buffer.toString('base64');
+
+    const newWallpaper = new Wallpaper({
+      imageData: imageData,
+      contentType: mimetype,
+    });
+
+    await newWallpaper.save();
+    res.status(201).json({ message: 'Wallpaper uploaded successfully' });
+  } catch (error) {
+    console.error('Error uploading wallpaper:', error);
+    res.status(500).send(error.message);
+  }
+});
+
+app.get('/god-quotes', async (req, res) => {
+  try {
+    const godQuotes = await GodQuotes.find({}, 'imageName imageData'); // Fetch only imageName and imageData fields
+    res.json(godQuotes);
+  } catch (error) {
+    console.error('Error fetching God quotes:', error);
+    res.status(500).send(error.message);
+  }
+});
+
+
+// Route to upload God quotes images
+app.post('/upload-god-quote', upload.array('images', 10), async (req, res) => {
+  try {
+    const files = req.files;
+    const uploadedImages = [];
+
+    for (const file of files) {
+      const { originalname, mimetype, buffer } = file;
+      const imageData = buffer.toString('base64');
+
+      const newGodQuote = new GodQuotes({
+        name: originalname,
+        imageData: imageData,
+        contentType: mimetype,
+      });
+
+      const savedImage = await newGodQuote.save();
+      uploadedImages.push(savedImage);
+    }
+
+    res.status(201).json({ message: 'God quotes uploaded successfully', images: uploadedImages });
+  } catch (error) {
+    console.error('Error uploading God quotes:', error);
+    res.status(500).send(error.message);
+  }
+});
+
 
 app.listen(PORT, () => 
   console.log(`Server started at PORT: ${PORT}`)

@@ -1,0 +1,8 @@
+{
+    "appService.zipIgnorePattern": [
+        "node_modules{,/**}",
+        ".vscode{,/**}"
+    ],
+    "appService.defaultWebAppToDeploy": "/subscriptions/ac1cb9cd-0ea8-4c3b-ac52-5c1a7cb376f5/resourceGroups/BhajanArti_group/providers/Microsoft.Web/sites/BhajanArti",
+    "appService.deploySubpath": "."
+}

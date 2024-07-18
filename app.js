@@ -26,7 +26,10 @@ const upload = multer({ storage: storage });
 
 
 
-
+app.get('/', (req, res) => {
+  res.send('Welcome to the God Aarti API');
+}
+);
 
 
   app.get('/songs', (req, res) => {

@@ -1,12 +1,16 @@
-// models/godQuotesModel.js
 const mongoose = require('mongoose');
 
 const godQuotesSchema = new mongoose.Schema({
-  name: String,
-  imageData: String,
-  contentType: String,
+  imageName: {
+    type: String,
+    required: true,
+  },
+  imageUrl: {
+    type: String,
+    required: true,
+  },
 });
 
-const GodQuotes = mongoose.model('godQuotes', godQuotesSchema);
+const GodQuotes = mongoose.model('GodQuotes', godQuotesSchema);
 
 module.exports = GodQuotes;

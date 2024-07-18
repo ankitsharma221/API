@@ -1,10 +1,16 @@
 const mongoose = require('mongoose');
 
-const imageSchema = new mongoose.Schema({
-  imageName: String,
-  imageData: String
+const wallpaperSchema = new mongoose.Schema({
+  imageName: {
+    type: String,
+    required: true,
+  },
+  imageUrl: {
+    type: String,
+    required: true,
+  },
 });
 
-const Image = mongoose.model('Image', imageSchema, 'wallpaper');
+const Wallpaper = mongoose.model('Wallpaper', wallpaperSchema);
 
-module.exports = Image;
+module.exports = Wallpaper;

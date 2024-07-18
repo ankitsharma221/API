@@ -12,7 +12,7 @@ const ganesh = require('./models/ganeshModel.js')
 const hanuman = require('./models/hanumanjiModel.js')
 const Image = require('./models/wallpaper.js')
 const multer = require('multer');
-const Wallpaper = require('./models/upload_wallpaper.js')
+const Wallpaper = require('./models/wallpaper');
 const GodQuotes = require('./models/godQuotesModel.js')
 
 const app = express()
@@ -190,38 +190,40 @@ app.post('/upload', (req, res) => {
    newSong.save()
 });
 
-app.get('/images', async (req, res) => {
+app.get('/wallpapers', async (req, res) => {
   try {
-    const images = await Image.find({}, 'imageData'); // Fetch only imageData field
-    res.json(images);
+    const wallpapers = await Wallpaper.find({}, 'imageName imageUrl');
+    res.json(wallpapers);
   } catch (error) {
-    console.error('Error fetching images:', error);
+    console.error('Error fetching wallpapers:', error);
     res.status(500).send(error.message);
   }
 });
 
 
-app.post('/upload-wallpaper', upload.single('image'), async (req, res) => {
+// Upload image route
+app.post('/upload-wallpaper', async (req, res) => {
   try {
-    const { mimetype, buffer } = req.file;
-    const imageData = buffer.toString('base64');
+    const { imageUrl, imageName } = req.body;
 
     const newWallpaper = new Wallpaper({
-      imageData: imageData,
-      contentType: mimetype,
+      imageUrl: imageUrl,
+      imageName: imageName,
     });
 
     await newWallpaper.save();
-    res.status(201).json({ message: 'Wallpaper uploaded successfully' });
+    res.status(201).json({ message: 'Wallpaper uploaded successfully', imageUrl, imageName });
   } catch (error) {
     console.error('Error uploading wallpaper:', error);
     res.status(500).send(error.message);
   }
 });
 
+
+// Updated GET route to fetch God quotes
 app.get('/god-quotes', async (req, res) => {
   try {
-    const godQuotes = await GodQuotes.find({}, 'imageName imageData'); // Fetch only imageName and imageData fields
+    const godQuotes = await GodQuotes.find({}, 'imageName imageUrl');
     res.json(godQuotes);
   } catch (error) {
     console.error('Error fetching God quotes:', error);
@@ -230,32 +232,24 @@ app.get('/god-quotes', async (req, res) => {
 });
 
 
-// Route to upload God quotes images
-app.post('/upload-god-quote', upload.array('images', 10), async (req, res) => {
+// Updated POST route to upload God quotes images
+app.post('/upload-god-quote', async (req, res) => {
   try {
-    const files = req.files;
-    const uploadedImages = [];
+    const { imageName, imageUrl } = req.body;
 
-    for (const file of files) {
-      const { originalname, mimetype, buffer } = file;
-      const imageData = buffer.toString('base64');
+    const newGodQuote = new GodQuotes({
+      imageName: imageName,
+      imageUrl: imageUrl,
+    });
 
-      const newGodQuote = new GodQuotes({
-        name: originalname,
-        imageData: imageData,
-        contentType: mimetype,
-      });
-
-      const savedImage = await newGodQuote.save();
-      uploadedImages.push(savedImage);
-    }
-
-    res.status(201).json({ message: 'God quotes uploaded successfully', images: uploadedImages });
+    await newGodQuote.save();
+    res.status(201).json({ message: 'God quote uploaded successfully', imageUrl });
   } catch (error) {
-    console.error('Error uploading God quotes:', error);
+    console.error('Error uploading God quote:', error);
     res.status(500).send(error.message);
   }
 });
+
 
 
 app.listen(PORT, () => 

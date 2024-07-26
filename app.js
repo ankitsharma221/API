@@ -192,8 +192,22 @@ app.post('/upload', (req, res) => {
 
 app.get('/wallpapers', async (req, res) => {
   try {
-    const wallpapers = await Wallpaper.find({}, 'imageName imageUrl');
-    res.json(wallpapers);
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 20;
+    const skip = (page - 1) * limit;
+
+    const wallpapers = await Wallpaper.find({}, 'imageName imageUrl')
+      .skip(skip)
+      .limit(limit);
+
+    const totalCount = await Wallpaper.countDocuments();
+
+    res.json({
+      wallpapers,
+      currentPage: page,
+      totalPages: Math.ceil(totalCount / limit),
+      totalCount,
+    });
   } catch (error) {
     console.error('Error fetching wallpapers:', error);
     res.status(500).send(error.message);
@@ -223,8 +237,22 @@ app.post('/upload-wallpaper', async (req, res) => {
 // Updated GET route to fetch God quotes
 app.get('/god-quotes', async (req, res) => {
   try {
-    const godQuotes = await GodQuotes.find({}, 'imageName imageUrl');
-    res.json(godQuotes);
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 20;
+    const skip = (page - 1) * limit;
+
+    const godQuotes = await GodQuotes.find({}, 'imageName imageUrl')
+      .skip(skip)
+      .limit(limit);
+
+    const totalCount = await GodQuotes.countDocuments();
+
+    res.json({
+      godQuotes,
+      currentPage: page,
+      totalPages: Math.ceil(totalCount / limit),
+      totalCount,
+    });
   } catch (error) {
     console.error('Error fetching God quotes:', error);
     res.status(500).send(error.message);
